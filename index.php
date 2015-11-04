@@ -1,30 +1,32 @@
 <?php
 session_start();
+
+/**
+* Chargement Autoloader de Class
+**/
+require 'class/autoloader.php';
+App\Autoloader::register();
+$config = App\Config::getInstance();
+
 if(isset($_POST) && !empty($_POST['login']) && !empty($_POST['pass'])){
     extract($_POST);
     $pass = md5($pass);
-    mysql_connect("localhost","root","");
-    mysql_select_db("portail");
-    $sql = "SELECT users.id FROM users WHERE (((users.login)='".$login."') AND ((users.password)='".$pass."'))";
+    $db = new App\Database('nerissiren');
+    $sql = "SELECT users.id FROM users";
+    $datas = $db->query($sql);
 
-//    $sql = " SELECT id, admin, nom_usage FROM collaborateurs WHERE login='$login' AND password= '$pass'";
-    $req = mysql_query($sql) or die(mysql_error());
-    $tableau = mysql_fetch_array($req,MYSQL_ASSOC);
-    if(mysql_num_rows($req)>0){
+    if(count($datas)>0){
         $_SESSION['auth']=array(
             'login' => $login,
             'pass' => $pass,
             'myid' => $tableau['id']
           );
         $myid = $_SESSION['auth']['myid'];
-        // $loggon = date("Y-m-d H:i:s");
-        // $req_send = "INSERT INTO loggin(id, date_connect, id_collab) VALUES ('','$loggon','$myid')";
-        // $req = mysql_query($req_send) or die(mysql_error());
-          header('Location:app.php');
+        header('Location:app.php');
         }
-        else {
-          echo "Mauvais identifiant";
-        }
+    else {
+        echo "Mauvais identifiant";
+    }
 }
 ?>
 <!DOCTYPE html>
